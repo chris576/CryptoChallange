@@ -99,7 +99,7 @@ def decode_syndrome(H, codeword):
     # 2. Ist s = 0, so decodiere y := r = nn(r)
     if np.all(s == 0):
         return r, r[:k]
-    # 3. Prüfe für alle FEhlervektoren mit e \in F^n mit wt(e) = 1, ob s = He^T. Falls ja, dekodiere 
+    # 3. Prüfe für alle Fehlervektoren mit e \in F^n mit wt(e) = 1, ob s = He^T. Falls ja, dekodiere 
     # y:= r +e = nn(r)
     for i in range(n):
         e = np.zeros(n, dtype=int)
