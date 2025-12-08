@@ -34,14 +34,14 @@ class McElice():
         self.G_Priv = GF2(G)
         return self
     
-    def G_Pub(self, S, P) -> 'McElice':
+    def G_pub(self, S, P) -> 'McElice':
         """
         Public Key Generator Matrix
         G_Pub = S * G_Priv * P
         """
         self.S = GF2(S)
         self.P = GF2(P)
-        self.G_Pub = self.S @ self.G_Priv @ self.P
+        self.G_pub = self.S @ self.G_Priv @ self.P
         return self
 
     def S(self, S) -> 'McElice': 
@@ -63,7 +63,7 @@ class McElice():
         """
         msg_gf2 = GF2(message)
         err_gf2 = GF2(error_vector)
-        return msg_gf2 @ self.G_Pub + err_gf2
+        return msg_gf2 @ self.G_pub + err_gf2
 
     def decrypt(self, codeword):
         """
