@@ -166,7 +166,7 @@ class InformationSetDecoding(McElice):
         wt = r.weight()
         return wt == expected_weight, wt
     
-    def attack(self, ciphertext, expected_error_weight=0, num_errors=0, max_attempts=1000000, verbose=True):
+    def attack(self, ciphertext, t, max_attempts=1000000, verbose=True):
         """
         Information Set Decoding Angriff
         
@@ -195,11 +195,10 @@ class InformationSetDecoding(McElice):
             raise ValueError("G_pub muss gesetzt sein (set_G_pub aufrufen)")
         
         # Wenn Fehleranzahl bekannt: Erhöhe erwartetes Gewicht
-        if num_errors > 0 and expected_error_weight == 0:
-            expected_error_weight = num_errors
+        if t > 0:
             if verbose:
-                print(f"Erwarte {num_errors} Fehler in der Übertragung")
-                success_prob = self.calculate_success_probability(self.n, self.k, num_errors)
+                print(f"Erwarte {t} Fehler in der Übertragung")
+                success_prob = self.calculate_success_probability(self.n, self.k, t)
                 print(f"Wahrscheinlichkeit für fehlerfreies Information Set: {success_prob:.6f}")
                 expected_attempts = 1.0 / success_prob if success_prob > 0 else float('inf')
                 print(f"Erwartete Anzahl Versuche: {expected_attempts:.0f}\n")
@@ -242,10 +241,10 @@ class InformationSetDecoding(McElice):
                 x_candidate.set_bit(j, x_candidate_matrix.get_bit(0, j))
             
             # 6. Fehlervektor berechnen und Hamming-Gewicht prüfen
-            is_correct, wt = self.check_candidate(ciphertext, x_candidate, self.G_pub, expected_error_weight)
+            is_correct, wt = self.check_candidate(ciphertext, x_candidate, self.G_pub, t)
             
             if verbose and (attempt % 10000 == 0 or is_correct):
-                print(f"Versuch {attempt}: Fehlergewicht {wt} (erwartet: {expected_error_weight})")
+                print(f"Versuch {attempt}: Fehlergewicht {wt} (erwartet: {t})")
             
             if is_correct:
                 if verbose:
