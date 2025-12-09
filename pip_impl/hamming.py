@@ -1,8 +1,6 @@
 import numpy as np
 from typing import Sequence
-from galois import GF
-
-GF2 = GF(2)
+from galois import GF2 
 
 # Generatormatrix G
 # Fehlerhaftes Codeword R
