@@ -25,7 +25,7 @@ class LeeBrickellAttack(InformationSetDecoding):
                 error_vec.set_bit(pos, 1)
             yield error_vec
 
-    def attack(self, ciphertext, error_weight, p, max_attempts=1000000, verbose=True):
+    def attack(self, ciphertext, t, p, max_attempts=1000000, verbose=True):
         """
         Lee-Brickell ISD Angriff
 
@@ -98,7 +98,7 @@ class LeeBrickellAttack(InformationSetDecoding):
                         x_candidate.set_bit(idx, x_candidate_matrix.get_bit(0, idx))
 
                     # 6) globaler Test: wt(y - x'G') == t ?
-                    is_correct, wt = self.check_candidate(ciphertext, x_candidate, self.G_pub, error_weight)
+                    is_correct, wt = self.check_candidate(ciphertext, x_candidate, self.G_pub, t)
 
                     if is_correct:
                         if verbose:

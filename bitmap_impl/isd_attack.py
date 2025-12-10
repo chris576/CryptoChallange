@@ -11,7 +11,7 @@ from .mcelice_bitmap import (
     decode_syndrome_bitmap, parity_check_matrix,
     bit_xor, bit_and
 )
-import random
+import random   
 
 
 class InformationSetDecoding(McElice):
@@ -31,7 +31,7 @@ class InformationSetDecoding(McElice):
         else:
             raise TypeError("v muss BitVector oder Liste sein")
     
-    def calculate_success_probability(self, n, k, num_errors):
+    def calculate_complexity(self, n, k, t):
         """
         Berechne Wahrscheinlichkeit, dass ein zufällig gewähltes Information Set
         keine Fehler enthält.
@@ -41,21 +41,25 @@ class InformationSetDecoding(McElice):
             k: Größe des Information Sets
             num_errors: Anzahl der Fehler
         
+        Rechnung der durchschnittlichen Laufzeit: 
+        = 0(k^3(n über k) / (n-t über k))
+        
         Returns:
             float - Wahrscheinlichkeit (0.0 bis 1.0)
         """
-        # Wahrscheinlichkeit = C(n-num_errors, k) / C(n, k)
-        # = (n-num_errors)! / k! * (n-num_errors-k)! * k! * (n-k)! / n!
-        # = Produkt_{i=0}^{k-1} (n-num_errors-i) / (n-i)
+        from math import comb
+        if t < 0 or t > n:
+            raise ValueError("num_errors muss zwischen 0 und n liegen")
+        if k > n:
+            raise ValueError("k darf nicht größer als n sein")
+        if k > n - t:
+            print("Warnung: k > n - t, Wahrscheinlichkeit ist 0")
+            return 0.0  # Unmöglich, ein fehlerfreies IS zu wählen
         
-        if num_errors >= n - k + 1:
-            return 0.0  # Unmöglich ein fehlerfreies Information Set zu finden
+        numerator = comb(n - t, k)
+        denominator = comb(n, k)
         
-        prob = 1.0
-        for i in range(k):
-            prob *= (n - num_errors - i) / (n - i)
-        
-        return prob
+        return k**3 * (numerator / denominator)
     
     def set_G_pub(self, G):
         """
@@ -198,15 +202,18 @@ class InformationSetDecoding(McElice):
         if t > 0:
             if verbose:
                 print(f"Erwarte {t} Fehler in der Übertragung")
-                success_prob = self.calculate_success_probability(self.n, self.k, t)
-                print(f"Wahrscheinlichkeit für fehlerfreies Information Set: {success_prob:.6f}")
-                expected_attempts = 1.0 / success_prob if success_prob > 0 else float('inf')
-                print(f"Erwartete Anzahl Versuche: {expected_attempts:.0f}\n")
+                complexity = self.calculate_complexity(self.n, self.k, t)
+                print(f"Geschätzte durchschnittliche Laufzeitkomplexität: {complexity}")
+                n = 0.0085 # sekunden
+                print(f"Geschätzte Zeit pro Versuch {n} Sekunden")
+                print("Geschätzte Zeit: ca. {:.4f} Sekunden".format(n * self.k**3))
+                
+                
         
         attempt = 0
+        import time
         while attempt < max_attempts:
             attempt += 1
-            
             # 1. Zufällig k Positionen auswählen
             # Strategie: Wenn wir num_errors kennen, versuchen wir k Positionen zu wählen,
             # die wahrscheinlich keine Fehler enthalten
