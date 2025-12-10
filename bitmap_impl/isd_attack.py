@@ -39,7 +39,7 @@ class InformationSetDecoding(McElice):
         Args:
             n: Gesamtlänge des Codewortes
             k: Größe des Information Sets
-            num_errors: Anzahl der Fehler
+            t: Anzahl der Fehler
         
         Rechnung der durchschnittlichen Laufzeit: 
         = 0(k^3(n über k) / (n-t über k))
@@ -49,7 +49,7 @@ class InformationSetDecoding(McElice):
         """
         from math import comb
         if t < 0 or t > n:
-            raise ValueError("num_errors muss zwischen 0 und n liegen")
+            raise ValueError("t muss zwischen 0 und n liegen")
         if k > n:
             raise ValueError("k darf nicht größer als n sein")
         if k > n - t:
@@ -228,6 +228,8 @@ class InformationSetDecoding(McElice):
                 G_inv = G_sub.inverse()
             except (ValueError, ZeroDivisionError):
                 # Nicht invertierbar, neue Positionen wählen
+                t2 = time.time()
+                times.append(t2 - t1)
                 if verbose and attempt % 10000 == 0:
                     print(f"Versuch {attempt}: Nicht invertierbar")
                 continue
