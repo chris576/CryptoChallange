@@ -58,7 +58,6 @@ class InformationSetDecoding(McElice):
         
         numerator = comb(n - t, k)
         denominator = comb(n, k)
-        
         return k**3 * (numerator / denominator)
     
     def set_G_pub(self, G):
@@ -140,7 +139,7 @@ class InformationSetDecoding(McElice):
         
         return result
     
-    def check_candidate(self, cipher, candidate, G_pub, expected_weight):
+    def check_candidate(self, cipher, candidate, G_pub, t):
         """
         Prüft, ob ein rekonstruierter Kandidat korrekt ist.
 
@@ -168,7 +167,7 @@ class InformationSetDecoding(McElice):
         
         # Fehlergewicht prüfen
         wt = r.weight()
-        return wt == expected_weight, wt
+        return wt == t, wt
     
     def attack(self, ciphertext, t, max_attempts=1000000, verbose=True):
         """
@@ -202,16 +201,14 @@ class InformationSetDecoding(McElice):
         if t > 0:
             if verbose:
                 print(f"Erwarte {t} Fehler in der Übertragung")
-                complexity = self.calculate_complexity(self.n, self.k, t)
-                print(f"Geschätzte durchschnittliche Laufzeitkomplexität: {complexity}")
-                n = 0.0085 # sekunden
-                print(f"Geschätzte Zeit pro Versuch {n} Sekunden")
-                print("Geschätzte Zeit: ca. {:.4f} Sekunden".format(n * self.k**3))
-                
+                self.complexity = self.calculate_complexity(self.n, self.k, t)
+                print(f"Geschätzte Anzahl der Versuche: {self.complexity}")                
                 
         
         attempt = 0
         import time
+        import statistics
+        times = []
         while attempt < max_attempts:
             attempt += 1
             # 1. Zufällig k Positionen auswählen
@@ -220,6 +217,8 @@ class InformationSetDecoding(McElice):
             # Da wir nicht wissen WO die Fehler sind, bleibt es zufällig, aber wir
             # erwarten, dass bei vielen Versuchen einige Information Sets fehlerfrei sind
             positions = random.sample(range(self.n), self.k)
+            
+            t1 = time.time()
             
             # 2. Extrahiere k×k Teilmatrix
             G_sub = self.extract_submatrix(self.G_pub, positions)
@@ -249,13 +248,16 @@ class InformationSetDecoding(McElice):
             
             # 6. Fehlervektor berechnen und Hamming-Gewicht prüfen
             is_correct, wt = self.check_candidate(ciphertext, x_candidate, self.G_pub, t)
-            
-            if verbose and (attempt % 10000 == 0 or is_correct):
-                print(f"Versuch {attempt}: Fehlergewicht {wt} (erwartet: {t})")
+                        
+            t2 = time.time()
+            times.append(t2 - t1)
             
             if is_correct:
                 if verbose:
                     print(f"✓ Erfolg nach {attempt} Versuchen!")
+                    print(f"Median Zeit pro Versuch: {statistics.median(times):.6f} Sekunden")
+                    print(f"Geschätzte Zeit laut geschätzten Versuchen * Median-Zeit: {self.complexity * statistics.median(times):.2f} Sekunden")
+                    print(f"Tatsächliche Zeit: {sum(times):.2f} Sekunden")
                 return x_candidate
         
         if verbose:

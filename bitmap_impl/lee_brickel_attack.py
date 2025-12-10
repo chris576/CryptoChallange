@@ -25,6 +25,8 @@ class LeeBrickellAttack(InformationSetDecoding):
                 error_vec.set_bit(pos, 1)
             yield error_vec
 
+    
+
     def attack(self, ciphertext, t, p, max_attempts=1000000, verbose=True):
         """
         Lee-Brickell ISD Angriff
